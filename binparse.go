@@ -9,19 +9,23 @@ import (
 	"strings"
 )
 
-type decoder struct {
+type Decoder struct {
 	buf []byte
 }
 
-type encoder struct {
+type Encoder struct {
 	w io.Writer
 }
 
-func NewEncoder(w io.Writer) *encoder {
-	return &encoder{w: w}
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{w: w}
 }
 
-func (e *encoder) Encode(v any) error {
+func is64Bit() bool {
+	return reflect.TypeOf(int(0)).Size() == 8
+}
+
+func (e *Encoder) Encode(v any) error {
 
 	val := reflect.Indirect(reflect.ValueOf(v))
 
@@ -32,6 +36,24 @@ func (e *encoder) Encode(v any) error {
 		if field.CanInterface() {
 
 			switch field.Kind() {
+
+			case reflect.Int:
+				if is64Bit() {
+
+					var x int64 = int64(field.Int())
+
+					if err := binary.Write(e.w, binary.BigEndian, x); err != nil {
+						return err
+					}
+				} else {
+
+					var x int32 = int32(field.Int())
+
+					if err := binary.Write(e.w, binary.BigEndian, x); err != nil {
+						return err
+					}
+				}
+
 			case reflect.String:
 				if err := binary.Write(e.w, binary.BigEndian, []byte(field.String()+"\x00")); err != nil {
 					return err
@@ -47,9 +69,9 @@ func (e *encoder) Encode(v any) error {
 	return nil
 }
 
-func NewDecoder(r io.Reader) *decoder {
+func NewDecoder(r io.Reader) *Decoder {
 
-	d := &decoder{
+	d := &Decoder{
 		buf: make([]byte, 0),
 	}
 
@@ -64,7 +86,7 @@ func NewDecoder(r io.Reader) *decoder {
 	return d
 }
 
-func (d *decoder) Decode(v any) error {
+func (d *Decoder) Decode(v any) error {
 
 	iv := reflect.ValueOf(v)
 
