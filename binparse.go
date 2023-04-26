@@ -9,14 +9,6 @@ import (
 	"strings"
 )
 
-type Decoder interface {
-	Decode(v any) error
-}
-
-type Encoder interface {
-	Encode(v any) error
-}
-
 type decoder struct {
 	buf []byte
 }
@@ -25,7 +17,7 @@ type encoder struct {
 	w io.Writer
 }
 
-func NewEncoder(w io.Writer) Encoder {
+func NewEncoder(w io.Writer) *encoder {
 	return &encoder{w: w}
 }
 
@@ -55,7 +47,7 @@ func (e *encoder) Encode(v any) error {
 	return nil
 }
 
-func NewDecoder(r io.Reader) Decoder {
+func NewDecoder(r io.Reader) *decoder {
 
 	d := &decoder{
 		buf: make([]byte, 0),
