@@ -39,17 +39,12 @@ func (e *Encoder) Encode(v any) error {
 
 			case reflect.Int:
 				if is64Bit() {
-
-					var x int64 = int64(field.Int())
-
-					if err := binary.Write(e.w, binary.BigEndian, x); err != nil {
+					if err := binary.Write(e.w, binary.BigEndian, int64(field.Int())); err != nil {
 						return err
 					}
 				} else {
 
-					var x int32 = int32(field.Int())
-
-					if err := binary.Write(e.w, binary.BigEndian, x); err != nil {
+					if err := binary.Write(e.w, binary.BigEndian, int32(field.Int())); err != nil {
 						return err
 					}
 				}
