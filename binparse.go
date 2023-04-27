@@ -21,10 +21,6 @@ func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w: w}
 }
 
-func is64Bit() bool {
-	return reflect.TypeOf(int(0)).Size() == 8
-}
-
 func (e *Encoder) Encode(v any) error {
 
 	val := reflect.Indirect(reflect.ValueOf(v))
@@ -36,18 +32,6 @@ func (e *Encoder) Encode(v any) error {
 		if field.CanInterface() {
 
 			switch field.Kind() {
-
-			case reflect.Int:
-				if is64Bit() {
-					if err := binary.Write(e.w, binary.BigEndian, int64(field.Int())); err != nil {
-						return err
-					}
-				} else {
-
-					if err := binary.Write(e.w, binary.BigEndian, int32(field.Int())); err != nil {
-						return err
-					}
-				}
 
 			case reflect.String:
 				if err := binary.Write(e.w, binary.BigEndian, []byte(field.String()+"\x00")); err != nil {
@@ -126,8 +110,9 @@ func (d *Decoder) Decode(v any) error {
 		}
 
 		switch fv.Kind() {
+
 		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-			reflect.Int16, reflect.Int8, reflect.Int32, reflect.Int64, reflect.Int, reflect.Uint:
+			reflect.Int16, reflect.Int8, reflect.Int32, reflect.Int64:
 
 			err := binary.Read(bytes.NewReader(d.buf), byteOrder, fv.Addr().Interface())
 

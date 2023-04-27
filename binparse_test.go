@@ -7,13 +7,15 @@ import (
 	"github.com/vxcute/binparse"
 )
 
-func TestEncode(t *testing.T) {
+type User struct {
+	Name   string
+	Age    int64
+	Gender string
+}
 
-	usr := struct {
-		Name   string
-		Age    int
-		Gender string
-	}{
+func TestEncodeAndDecode(t *testing.T) {
+
+	usr := &User{
 		Name:   "Ahmed",
 		Age:    18,
 		Gender: "Male",
@@ -26,4 +28,12 @@ func TestEncode(t *testing.T) {
 	}
 
 	t.Log("Bytes: ", buf.Bytes())
+
+	var dusr User
+
+	if err := binparse.NewDecoder(buf).Decode(&dusr); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Name: %s | Age: %d | Gender: %s\n", dusr.Name, dusr.Age, dusr.Gender)
 }
