@@ -17,6 +17,8 @@ type Encoder struct {
 	w io.Writer
 }
 
+var byteOrder binary.ByteOrder = binary.BigEndian
+
 func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w: w}
 }
@@ -34,11 +36,11 @@ func (e *Encoder) Encode(v any) error {
 			switch field.Kind() {
 
 			case reflect.String:
-				if err := binary.Write(e.w, binary.BigEndian, []byte(field.String()+"\x00")); err != nil {
+				if err := binary.Write(e.w, byteOrder, []byte(field.String()+"\x00")); err != nil {
 					return err
 				}
 			default:
-				if err := binary.Write(e.w, binary.BigEndian, field.Interface()); err != nil {
+				if err := binary.Write(e.w, byteOrder, field.Interface()); err != nil {
 					return err
 				}
 			}
@@ -83,7 +85,6 @@ func (d *Decoder) Decode(v any) error {
 	}
 
 	var (
-		byteOrder  binary.ByteOrder = binary.BigEndian
 		terminator int              = 0
 		rest       bool             = false
 	)
