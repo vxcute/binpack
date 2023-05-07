@@ -56,13 +56,15 @@ func NewDecoder(r io.Reader) *Decoder {
 		buf: make([]byte, 0),
 	}
 
-	buf, err := io.ReadAll(r)
+	buf := new(bytes.Buffer)
+
+	_, err := io.Copy(buf, r)
 
 	if err != nil {
 		return nil
 	}
 
-	d.buf = buf
+	d.buf = buf.Bytes()
 
 	return d
 }
@@ -72,16 +74,16 @@ func (d *Decoder) Decode(v any) error {
 	iv := reflect.ValueOf(v)
 
 	if iv.Kind() != reflect.Ptr {
-		return errors.New("bin: not a pointer")
+		return errors.New("binparse: not a pointer")
 	} else if iv.IsNil() {
-		return errors.New("bin: nil ptr")
+		return errors.New("binparse: nil ptr")
 	}
 
 	iv = iv.Elem()
 	it := iv.Type()
 
 	if it.Kind() != reflect.Struct {
-		return errors.New("bin: not a struct")
+		return errors.New("binparse: not a struct")
 	}
 
 	var (
@@ -93,7 +95,7 @@ func (d *Decoder) Decode(v any) error {
 
 		fv := iv.Field(i)
 		ft := it.Field(i)
-		tag := ft.Tag.Get("bin")
+		tag := ft.Tag.Get("binparse")
 
 		if !fv.CanSet() || tag == "-" {
 			continue
@@ -126,7 +128,7 @@ func (d *Decoder) Decode(v any) error {
 			n := bytes.IndexByte(d.buf, byte(terminator))
 
 			if n == -1 {
-				return errors.New("bin: missing terminator")
+				return errors.New("binparse: missing terminator")
 			}
 
 			fv.SetString(string(d.buf[:n]))
@@ -141,10 +143,10 @@ func (d *Decoder) Decode(v any) error {
 		case reflect.Struct:
 			err := d.Decode(fv.Addr().Interface())
 			if err != nil {
-				return errors.New("bin: failed to decode inner struct")
+				return errors.New("binparse: failed to decode inner struct")
 			}
 		default:
-			return errors.New("bin: invalid type")
+			return errors.New("binparse: invalid type")
 		}
 	}
 
