@@ -9,16 +9,16 @@ import (
 
 type User struct {
 	Name   string
-	Age    int64
+	Age    int8
 	Gender string
 }
 
 func TestEncodeAndDecode(t *testing.T) {
 
 	usr := &User{
-		Name:   "Ahmed",
-		Age:    18,
-		Gender: "Male",
+		Name:   "AAA",
+		Age:    1,
+		Gender: "BBB",
 	}
 
 	buf := new(bytes.Buffer)

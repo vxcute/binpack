@@ -46,7 +46,7 @@ func (e *Encoder) Encode(v any) error {
 			}
 		}
 	}
-
+	
 	return nil
 }
 
@@ -56,15 +56,13 @@ func NewDecoder(r io.Reader) *Decoder {
 		buf: make([]byte, 0),
 	}
 
-	buf := new(bytes.Buffer)
+	var err error
 
-	_, err := io.Copy(buf, r)
+	d.buf, err = io.ReadAll(r)
 
 	if err != nil {
 		return nil
 	}
-
-	d.buf = buf.Bytes()
 
 	return d
 }
