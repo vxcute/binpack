@@ -52,16 +52,16 @@ func Unpack(buf []byte, v any) error {
 	iv := reflect.ValueOf(v)
 
 	if iv.Kind() != reflect.Ptr {
-		return errors.New("binparse: not a pointer")
+		return errors.New("binpack: not a pointer")
 	} else if iv.IsNil() {
-		return errors.New("binparse: nil ptr")
+		return errors.New("binpack: nil ptr")
 	}
 
 	iv = iv.Elem()
 	it := iv.Type()
 
 	if it.Kind() != reflect.Struct {
-		return errors.New("binparse: not a struct")
+		return errors.New("binpack: not a struct")
 	}
 
 	var (
@@ -73,7 +73,7 @@ func Unpack(buf []byte, v any) error {
 
 		fv := iv.Field(i)
 		ft := it.Field(i)
-		tag := ft.Tag.Get("binparse")
+		tag := ft.Tag.Get("binpack")
 
 		if !fv.CanSet() || tag == "-" {
 			continue
@@ -110,7 +110,7 @@ func Unpack(buf []byte, v any) error {
 			n := bytes.IndexByte(buf, byte(terminator))
 
 			if n == -1 {
-				return errors.New("binparse: missing terminator")
+				return errors.New("binpack: missing terminator")
 			}
 
 			fv.SetString(string(buf[:n]))
@@ -122,7 +122,7 @@ func Unpack(buf []byte, v any) error {
 				buf = nil
 			}
 		default:
-			return errors.New("binparse: invalid type")
+			return errors.New("binpack: invalid type")
 		}
 	}
 
