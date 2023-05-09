@@ -5,7 +5,8 @@ it doesn't support fields of struct types and pointer types but I will add them 
 
 Example: 
 
-    ```go
+```go
+
     package main 
 
     import ( 
@@ -45,4 +46,5 @@ Example:
         fmt.Println("User: ", user)
         fmt.Println("User: ", usr)
     }
-    ```
+
+```
