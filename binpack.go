@@ -12,9 +12,11 @@ import (
 
 var byteOrder binary.ByteOrder = binary.BigEndian
 
-func Pack(w io.Writer, v any) error {
+func Pack(v any) ([]byte,error) {
 
 	val := reflect.Indirect(reflect.ValueOf(v))
+
+	buf := new(bytes.Buffer)
 
 	for i := 0; i < val.NumField(); i++ {
 
@@ -23,18 +25,26 @@ func Pack(w io.Writer, v any) error {
 		if field.CanInterface() {
 			switch field.Kind() {
 			case reflect.String:
-				if err := binary.Write(w, byteOrder, []byte(field.String() + "\x00")); err != nil {
-					return err
+				if err := binary.Write(buf, byteOrder, []byte(field.String() + "\x00")); err != nil {
+					return nil, err
+				}
+			case reflect.Struct:
+				b, err := Pack(field.Interface())
+				if err != nil {
+					return nil, err
+				}
+				if err := binary.Write(buf, byteOrder, b); err != nil {
+					return nil, err
 				}
 			default:
-				if err := binary.Write(w, byteOrder, field.Interface()); err != nil {
-					return err
+				if err := binary.Write(buf, byteOrder, field.Interface()); err != nil {
+					return nil,err
 				}
 			}
 		}
 	}
 
-	return nil
+	return buf.Bytes(), nil
 }
 
 func Unpack(buf []byte, v any) error {
@@ -111,14 +121,6 @@ func Unpack(buf []byte, v any) error {
 				fv.SetBytes(buf)
 				buf = nil
 			}
-		
-		
-		case reflect.Struct:
-			err := Unpack(buf, fv.Addr().Interface())
-			if err != nil {
-				return errors.New("binparse: failed to decode inner struct")
-			}
-			
 		default:
 			return errors.New("binparse: invalid type")
 		}

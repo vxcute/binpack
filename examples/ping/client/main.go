@@ -40,12 +40,13 @@ func main() {
 		Data: "PING",
 	}
 
-
-	err = binpack.Pack(conn, msg)
+	b, err := binpack.Pack(msg)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	conn.Write(b)
 
 	log.Println("wrote message")
 
