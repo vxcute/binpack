@@ -1,3 +1,3 @@
-module github.com/vxcute/binparse
+module github.com/vxcute/binpack
 
 go 1.20
