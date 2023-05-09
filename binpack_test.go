@@ -1,6 +1,7 @@
 package binpack_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/vxcute/binpack"
@@ -15,22 +16,24 @@ type User struct {
 func TestEncodeAndDecode(t *testing.T) {
 
 	usr := &User{
-		Name:   "AAA",
-		Age:    1,
-		Gender: "BBB",
+		Name:   "Ahmed",
+		Age:    18,
+		Gender: "Male",
 	}
 
-	b, err := binpack.Pack(usr) 
+	buf := new(bytes.Buffer)
+
+	err := binpack.Pack(buf, usr) 
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log(b)
+	t.Log(buf.Bytes())
 
 	var user User 
 
-	if err := binpack.Unpack(b, &user); err != nil {
+	if err := binpack.Unpack(buf.Bytes(), &user); err != nil {
 		t.Fatal(err)
 	}
 

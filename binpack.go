@@ -12,9 +12,7 @@ import (
 
 var byteOrder binary.ByteOrder = binary.BigEndian
 
-func Pack(v any) ([]byte, error) {
-
-	buf := new(bytes.Buffer)
+func Pack(buf io.Writer, v any) error {
 
 	val := reflect.Indirect(reflect.ValueOf(v))
 
@@ -26,17 +24,17 @@ func Pack(v any) ([]byte, error) {
 			switch field.Kind() {
 			case reflect.String:
 				if err := binary.Write(buf, byteOrder, []byte(field.String() + "\x00")); err != nil {
-					return nil, err
+					return err
 				}
 			default:
 				if err := binary.Write(buf, byteOrder, field.Interface()); err != nil {
-					return nil, err
+					return err
 				}
 			}
 		}
 	}
 
-	return buf.Bytes(), nil
+	return nil
 }
 
 func Unpack(buf []byte, v any) error {

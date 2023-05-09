@@ -56,13 +56,14 @@ func handle(conn net.Conn) {
 				Data: "PONG",
 			}
 
-			respb, err := binpack.Pack(resp) 
+			if err := binpack.Pack(conn, resp); err != nil {
+				log.Println("Err: ", err)
+				break
+			}
 
 			if err != nil {
 				log.Println("err: ", err)
 			}
-
-			conn.Write(respb)
 		}
 	}
 }

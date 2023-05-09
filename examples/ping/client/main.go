@@ -35,19 +35,17 @@ func main() {
 
 	defer conn.Close()
 
-	msg :=Message{ 
+	msg := Message{ 
 		Opcode: PING,
 		Data: "PING",
 	}
 
 
-	b, err := binpack.Pack(msg)
+	err = binpack.Pack(conn, msg)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	conn.Write(b)
 
 	log.Println("wrote message")
 
